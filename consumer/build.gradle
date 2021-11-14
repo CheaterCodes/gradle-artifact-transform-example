@@ -1,0 +1,54 @@
+import org.gradle.api.artifacts.transform.InputArtifact
+import org.gradle.api.artifacts.transform.TransformAction
+import org.gradle.api.artifacts.transform.TransformOutputs
+import org.gradle.api.artifacts.transform.TransformParameters
+import org.gradle.api.file.FileSystemLocation
+import org.gradle.api.provider.Provider
+
+import java.nio.file.Files
+
+abstract class DummyTransform implements TransformAction<TransformParameters.None> {
+    @InputArtifact
+    abstract Provider<FileSystemLocation> getInputArtifact()
+
+    @Override
+    void transform(TransformOutputs outputs) {
+        def input = inputArtifact.get().asFile
+        def output = outputs.file(input.name)
+        Files.copy(input.toPath(), output.toPath())
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+group 'codes.cheater'
+version '1.0'
+
+var exampleAttribute = Attribute.of("codes.cheater.example", Boolean)
+
+dependencies.attributesSchema {
+    attribute(exampleAttribute)
+}
+
+configurations.all {
+    attributes {
+        attribute(exampleAttribute, true)
+    }
+}
+
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    registerTransform(DummyTransform) {
+        from.attribute(exampleAttribute, false)
+        to.attribute(exampleAttribute, true)
+    }
+}
+
+dependencies {
+    implementation project(':supplier')
+}

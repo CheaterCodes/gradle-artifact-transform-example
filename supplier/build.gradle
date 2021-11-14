@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group 'codes.cheater'
+version '1.0'
+
+var exampleAttribute = Attribute.of("codes.cheater.example", Boolean)
+
+dependencies.attributesSchema {
+    attribute(exampleAttribute)
+}
+
+configurations.all {
+    attributes {
+        attribute(exampleAttribute, false)
+    }
+}
